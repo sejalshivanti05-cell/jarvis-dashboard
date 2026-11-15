@@ -1,1 +1,504 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.R.V.I.S. Golden Holographic Core Interface</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            glow: '#ffb703',
+                        },
+                        darkbase: '#050402',
+                        darkcard: '#0c0a06',
+                    },
+                    fontFamily: {
+                        mono: ['Courier New', Courier, monospace],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js for 3D Holographic Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @keyframes amberPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 20px rgba(245, 158, 11, 0.2); }
+            50% { box-shadow: 0 0 45px rgba(245, 158, 11, 0.8), inset 0 0 30px rgba(245, 158, 11, 0.4); }
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(1000%); }
+        }
+        .holo-glow {
+            animation: amberPulse 3s infinite ease-in-out;
+        }
+        .scanline-effect::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(to bottom, rgba(245,158,11,0), rgba(245,158,11,0.8) 50%, rgba(245,158,11,0));
+            animation: scanline 5s linear infinite;
+            pointer-events: none;
+            opacity: 0.25;
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #050402; }
+        ::-webkit-scrollbar-thumb { background: #b45309; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-darkbase text-amber-400 font-mono min-h-screen flex flex-col overflow-x-hidden selection:bg-amber-500 selection:text-black">
 
+    <!-- Top Navigation / Status Header -->
+    <header class="border-b border-amber-900/40 bg-darkcard/90 backdrop-blur-md sticky top-0 z-50 px-4 py-3 flex flex-wrap justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-full border-2 border-amber-500 holo-glow flex items-center justify-center bg-amber-950/40">
+                <div class="w-3.5 h-3.5 bg-amber-400 rounded-full animate-ping"></div>
+            </div>
+            <div>
+                <h1 class="text-base sm:text-lg font-bold tracking-widest text-white flex items-center gap-2">
+                    J.A.R.V.I.S. <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700">MARK XLII PROTOCOL</span>
+                </h1>
+                <p class="text-xs text-amber-600">Golden Holographic HUD • COM3 Neural Link</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3 mt-2 sm:mt-0 text-xs">
+            <div class="flex items-center space-x-2 bg-darkbase px-3 py-1.5 rounded-lg border border-amber-900/60 shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-gray-300">Arduino Nano:</span>
+                <span class="text-emerald-400 font-bold">COM3 [LINKED]</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-2 bg-darkbase px-3 py-1.5 rounded-lg border border-amber-900/60">
+                <i class="fa-solid fa-clock text-amber-500"></i>
+                <span class="text-amber-400" id="system-clock">00:00:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Grid -->
+    <main class="flex-1 p-4 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- Left & Center Column: 3D Holographic Core & Chat Interface -->
+        <section class="lg:col-span-2 flex flex-col gap-4">
+            
+            <!-- 3D Holographic Core Viewport -->
+            <div class="bg-darkcard rounded-xl border border-amber-900/50 relative h-64 sm:h-80 overflow-hidden scanline-effect shadow-2xl flex items-center justify-center">
+                <!-- Three.js Canvas Container -->
+                <div id="canvas-container" class="absolute inset-0 cursor-grab active:cursor-grabbing"></div>
+                
+                <!-- HUD Overlay Badges -->
+                <div class="absolute top-3 left-3 pointer-events-none bg-darkbase/80 backdrop-blur border border-amber-900/60 px-3 py-1 rounded text-[11px] text-amber-400">
+                    <i class="fa-solid fa-cube mr-1"></i> 3D HOLOGRAPHIC ROTATING MATRIX
+                </div>
+                <div class="absolute top-3 right-3 pointer-events-none bg-darkbase/80 backdrop-blur border border-amber-900/60 px-3 py-1 rounded text-[11px] text-amber-500 animate-pulse">
+                    STATUS: ACTIVE MAPPING
+                </div>
+                <div class="absolute bottom-3 left-3 pointer-events-none text-[10px] text-amber-600">
+                    Tip: Click & drag to rotate the holographic core in 3D space.
+                </div>
+            </div>
+
+            <!-- Chat Console Box -->
+            <div class="bg-darkcard rounded-xl border border-amber-900/50 flex flex-col h-[380px] relative scanline-effect shadow-xl">
+                <!-- Chat Header -->
+                <div class="px-4 py-2.5 border-b border-amber-900/40 bg-darkcard/90 flex justify-between items-center text-xs">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-terminal text-amber-400"></i>
+                        <span class="font-semibold tracking-wide text-white">NEURAL DIALOGUE STREAM</span>
+                    </div>
+                    <button onclick="clearChat()" class="px-2 py-1 rounded bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i>Reset Context
+                    </button>
+                </div>
+
+                <!-- Chat Messages Scroll Area -->
+                <div id="chat-container" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs sm:text-sm">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-7 h-7 rounded-full bg-amber-950 border border-amber-500 flex items-center justify-center text-amber-400 shrink-0">
+                            <i class="fa-solid fa-robot text-xs"></i>
+                        </div>
+                        <div class="bg-amber-950/30 border border-amber-900/60 rounded-xl p-3 max-w-[85%] text-gray-200">
+                            <p class="font-bold text-amber-400 mb-0.5 text-[11px]">J.A.R.V.I.S. Core</p>
+                            <p>Golden holographic matrix initialized. All neural links and Arduino hardware channels synchronized on COM3. How may I assist?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="px-3 py-2 bg-darkcard/80 border-t border-amber-950 flex gap-2 overflow-x-auto text-xs">
+                    <button onclick="sendQuickPrompt('Turn on Arduino LED')" class="px-3 py-1 rounded-full bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800 shrink-0 transition">⚡ Turn on LED</button>
+                    <button onclick="sendQuickPrompt('Turn off Arduino LED')" class="px-3 py-1 rounded-full bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800 shrink-0 transition">🔌 Turn off LED</button>
+                    <button onclick="sendQuickPrompt('Run system diagnostics')" class="px-3 py-1 rounded-full bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800 shrink-0 transition">🔍 Diagnostics</button>
+                    <button onclick="sendQuickPrompt('What time is it?')" class="px-3 py-1 rounded-full bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800 shrink-0 transition">⏰ System Time</button>
+                </div>
+
+                <!-- Chat Form Input -->
+                <form id="chat-form" onsubmit="handleChatSubmit(event)" class="p-3 bg-darkcard border-t border-amber-900/40 flex items-center gap-2">
+                    <input type="text" id="user-input" placeholder="Enter command (e.g. 'turn on light', 'sensor telemetry')..." 
+                        class="flex-1 bg-darkbase border border-amber-900 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 transition placeholder:text-gray-600">
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-darkbase font-bold px-4 py-2 rounded-lg transition flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Right Column: Hardware Subsystems & Telemetry Logs -->
+        <section class="flex flex-col gap-4">
+            
+            <!-- Hardware Control Module -->
+            <div class="bg-darkcard rounded-xl border border-amber-900/50 p-4 shadow-xl">
+                <div class="flex items-center justify-between border-b border-amber-900/40 pb-3 mb-4">
+                    <h2 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-microchip text-amber-400"></i> HARDWARE CONTROLS
+                    </h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">ONLINE</span>
+                </div>
+
+                <div class="space-y-3.5">
+                    <!-- LED Toggle -->
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-darkbase border border-amber-900/60">
+                        <div>
+                            <p class="text-xs sm:text-sm font-semibold text-white">Arduino LED (Pin 13)</p>
+                            <p class="text-[10px] text-amber-600">Illumination Matrix</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="hardware-led-toggle" onchange="toggleHardwareLed(this)" class="sr-only peer">
+                            <div class="w-10 h-5 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Auxiliary Relay -->
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-darkbase border border-amber-900/60">
+                        <div>
+                            <p class="text-xs sm:text-sm font-semibold text-white">Auxiliary Relay (Pin 8)</p>
+                            <p class="text-[10px] text-amber-600">Secondary Power Feed</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="hardware-relay-toggle" onchange="toggleAuxRelay(this)" class="sr-only peer">
+                            <div class="w-10 h-5 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Sensor Query Button -->
+                    <button onclick="fetchSensorTelemetry()" class="w-full py-2.5 rounded-lg bg-amber-950 hover:bg-amber-900 border border-amber-700 text-amber-300 text-xs font-bold transition flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                        <i class="fa-solid fa-wave-square"></i> Query Sensor Telemetry (A0)
+                    </button>
+
+                    <!-- Telemetry Output Display -->
+                    <div class="bg-darkbase p-3 rounded-lg border border-amber-950 text-xs font-mono text-amber-300">
+                        <div class="flex justify-between text-gray-500 text-[10px] mb-1">
+                            <span>TELEMETRY FEED (COM3)</span>
+                            <span id="telemetry-timestamp">--:--:--</span>
+                        </div>
+                        <p id="telemetry-output" class="text-amber-400 text-xs">Status: Standby. Ready for signal transmission.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Telemetry Logs -->
+            <div class="bg-darkcard rounded-xl border border-amber-900/50 p-4 flex-1 flex flex-col shadow-xl min-h-[220px]">
+                <div class="flex items-center justify-between border-b border-amber-900/40 pb-3 mb-3">
+                    <h2 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-list-shield text-amber-400"></i> SYSTEM TELEMETRY LOGS
+                    </h2>
+                    <button onclick="clearLogs()" class="text-[10px] text-gray-500 hover:text-amber-400 transition">Clear</button>
+                </div>
+                <div id="logs-container" class="flex-1 bg-darkbase p-2.5 rounded-lg border border-amber-950 text-[11px] font-mono space-y-1.5 overflow-y-auto max-h-[190px]">
+                    <div class="text-gray-500">[11:52:00] Golden holographic core shaders compiled.</div>
+                    <div class="text-amber-600">[11:52:01] Serial link established on COM3 (9600 baud).</div>
+                    <div class="text-emerald-400">[11:52:02] Neural core online. Ready for commands.</div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Three.js Holographic Core Animation Script -->
+    <script>
+        // --- THREE.JS GOLDEN HOLOGRAPHIC CORE SETUP ---
+        let scene, camera, renderer, holoGroup;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        function initThreeHoloCore() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 6;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            holoGroup = new THREE.Group();
+            scene.add(holoGroup);
+
+            // Golden-Orange Wireframe Torus Rings (Inspired by Tony Stark's HUD)
+            const ringMaterial = new THREE.MeshBasicMaterial({
+                color: 0xf59e0b,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.65
+            });
+
+            const torus1 = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.05, 16, 100), ringMaterial);
+            const torus2 = new THREE.Mesh(new THREE.TorusGeometry(1.7, 0.04, 16, 80), ringMaterial);
+            torus2.rotation.x = Math.PI / 3;
+            
+            const torus3 = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.03, 16, 60), ringMaterial);
+            torus3.rotation.y = Math.PI / 4;
+
+            holoGroup.add(torus1);
+            holoGroup.add(torus2);
+            holoGroup.add(torus3);
+
+            // Central Glowing Sphere Core
+            const coreGeometry = new THREE.SphereGeometry(0.6, 32, 32);
+            const coreMaterial = new THREE.MeshBasicMaterial({
+                color: 0xffb703,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            const coreSphere = new THREE.Mesh(coreGeometry, coreMaterial);
+            holoGroup.add(coreSphere);
+
+            // Floating Particle Dust (Golden Sparkles)
+            const particleCount = 250;
+            const particleGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 6;
+                positions[i + 1] = (Math.random() - 0.5) * 6;
+                positions[i + 2] = (Math.random() - 0.5) * 6;
+            }
+
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMaterial = new THREE.PointsMaterial({
+                color: 0xfbbf24,
+                size: 0.04,
+                transparent: true,
+                opacity: 0.7
+            });
+            const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+            holoGroup.add(particleSystem);
+
+            // Mouse Interaction for 3D Rotation
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                holoGroup.rotation.y += deltaX * 0.008;
+                holoGroup.rotation.x += deltaY * 0.008;
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mouseup', () => { isDragging = false; });
+
+            // Touch support for mobile devices
+            container.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                const deltaY = e.touches[0].clientY - previousMousePosition.y;
+
+                holoGroup.rotation.y += deltaX * 0.008;
+                holoGroup.rotation.x += deltaY * 0.008;
+
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            });
+
+            window.addEventListener('touchend', () => { isDragging = false; });
+
+            // Window Resize Handler
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+            animateHolo();
+        }
+
+        function animateHolo() {
+            requestAnimationFrame(animateHolo);
+            // Continuous smooth rotation if not being dragged
+            if (!isDragging) {
+                holoGroup.rotation.y += 0.004;
+                holoGroup.rotation.z += 0.001;
+            }
+            renderer.render(scene, camera);
+        }
+
+        window.onload = function() {
+            initThreeHoloCore();
+            updateClock();
+            setInterval(updateClock, 1000);
+        };
+
+        // --- DASHBOARD UI & CHAT LOGIC ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('system-clock').textContent = now.toTimeString().split(' ')[0];
+        }
+
+        function addLog(message, type = 'info') {
+            const logsContainer = document.getElementById('logs-container');
+            const timeStr = new Date().toTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            
+            let colorClass = 'text-gray-400';
+            if (type === 'success') colorClass = 'text-emerald-400';
+            if (type === 'warning') colorClass = 'text-yellow-400';
+            if (type === 'action') colorClass = 'text-amber-400';
+
+            div.className = colorClass;
+            div.textContent = `[${timeStr}] ${message}`;
+            logsContainer.appendChild(div);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs-container').innerHTML = '<div class="text-gray-500">Logs cleared.</div>';
+        }
+
+        function appendMessage(sender, text, isAi = true) {
+            const chatContainer = document.getElementById('chat-container');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex items-start space-x-3 ${isAi ? '' : 'flex-row-reverse space-x-reverse'}`;
+
+            const iconBg = isAi ? 'bg-amber-950 border-amber-500 text-amber-400' : 'bg-slate-800 border-slate-600 text-amber-200';
+            const bubbleBg = isAi ? 'bg-amber-950/30 border-amber-900/60 text-gray-200' : 'bg-slate-900/80 border-slate-700 text-amber-100';
+            const iconClass = isAi ? 'fa-robot' : 'fa-user';
+
+            msgDiv.innerHTML = `
+                <div class="w-7 h-7 rounded-full ${iconBg} border flex items-center justify-center shrink-0">
+                    <i class="fa-solid ${iconClass} text-xs"></i>
+                </div>
+                <div class="${bubbleBg} border rounded-xl p-3 max-w-[85%]">
+                    <p class="font-bold ${isAi ? 'text-amber-400' : 'text-slate-300'} mb-0.5 text-[11px]">${sender}</p>
+                    <p class="whitespace-pre-line">${text}</p>
+                </div>
+            `;
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function handleChatSubmit(event) {
+            event.preventDefault();
+            const inputEl = document.getElementById('user-input');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            appendMessage('You', query, false);
+            inputEl.value = '';
+
+            setTimeout(() => { processAiResponse(query); }, 500);
+        }
+
+        function sendQuickPrompt(promptText) {
+            document.getElementById('user-input').value = promptText;
+            appendMessage('You', promptText, false);
+            setTimeout(() => { processAiResponse(promptText); }, 500);
+        }
+
+        function processAiResponse(cmd) {
+            const lower = cmd.toLowerCase();
+            let responseText = "";
+
+            if (lower.includes("turn on") || lower.includes("light on")) {
+                document.getElementById('hardware-led-toggle').checked = true;
+                responseText = "Executing serial transmission 'H' to Arduino Nano on COM3. Primary illumination LED activated.";
+                addLog("Hardware command: LED ON (Pin 13) sent to COM3.", "success");
+            } else if (lower.includes("turn off") || lower.includes("light off")) {
+                document.getElementById('hardware-led-toggle').checked = false;
+                responseText = "Executing serial transmission 'L' to Arduino Nano on COM3. Primary illumination LED deactivated.";
+                addLog("Hardware command: LED OFF (Pin 13) sent to COM3.", "warning");
+            } else if (lower.includes("diagnostic") || lower.includes("report")) {
+                responseText = "System Diagnostics Report:\n• Holographic Core: 60 FPS Render Stable\n• COM3 Port Link: Active (9600 Baud)\n• Speech Engine: pyttsx3 online\n• Environment: Secure Offline Workspace";
+                addLog("System diagnostic report generated successfully.", "action");
+            } else if (lower.includes("time")) {
+                const now = new Date().toLocaleTimeString();
+                responseText = `Current system time is ${now}.`;
+                addLog("Time query processed.", "info");
+            } else {
+                responseText = `Command processed through local neural network: "${cmd}". Golden holographic matrix and hardware channels operating normally.`;
+                addLog(`Natural language command processed: ${cmd}`, "action");
+            }
+
+            appendMessage('J.A.R.V.I.S.', responseText, true);
+        }
+
+        function toggleHardwareLed(checkbox) {
+            if (checkbox.checked) {
+                addLog("Hardware Toggle: LED set to HIGH via HUD.", "success");
+                appendMessage('J.A.R.V.I.S.', "Arduino LED pin 13 toggled ON.", true);
+            } else {
+                addLog("Hardware Toggle: LED set to LOW via HUD.", "warning");
+                appendMessage('J.A.R.V.I.S.', "Arduino LED pin 13 toggled OFF.", true);
+            }
+        }
+
+        function toggleAuxRelay(checkbox) {
+            if (checkbox.checked) {
+                addLog("Auxiliary Relay pin 8 engaged.", "success");
+                appendMessage('J.A.R.V.I.S.', "Secondary power relay engaged.", true);
+            } else {
+                addLog("Auxiliary Relay pin 8 disengaged.", "warning");
+                appendMessage('J.A.R.V.I.S.', "Secondary power relay disengaged.", true);
+            }
+        }
+
+        function fetchSensorTelemetry() {
+            const mockVal = Math.floor(480 + Math.random() * 120);
+            document.getElementById('telemetry-output').textContent = `READOUT A0: ${mockVal} [STABLE]`;
+            document.getElementById('telemetry-timestamp').textContent = new Date().toTimeString().split(' ')[0];
+            addLog(`Polled sensor pin A0: ${mockVal}`, "success");
+            appendMessage('J.A.R.V.I.S.', `Sensor telemetry retrieved from Arduino Nano pin A0: ${mockVal} units.`, true);
+        }
+
+        function clearChat() {
+            document.getElementById('chat-container').innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <div class="w-7 h-7 rounded-full bg-amber-950 border border-amber-500 flex items-center justify-center text-amber-400 shrink-0">
+                        <i class="fa-solid fa-robot text-xs"></i>
+                    </div>
+                    <div class="bg-amber-950/30 border border-amber-900/60 rounded-xl p-3 max-w-[85%] text-gray-200">
+                        <p class="font-bold text-amber-400 mb-0.5 text-[11px]">J.A.R.V.I.S. Core</p>
+                        <p>Context reset. Ready for new instructions.</p>
+                    </div>
+                </div>
+            `;
+            addLog("Chat dialogue context reset.", "info");
+        }
+    </script>
+</body>
+</html>
+```
